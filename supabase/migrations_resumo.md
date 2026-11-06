@@ -6,6 +6,7 @@ Aplicado via MCP em 05/11/2026:
 2. `radar_config_e_cron` — tabela `radar_config` (cron_secret, site_url, remetente), pg_cron + pg_net,
    job `radar-alertas-semanais` (segundas 11:23 UTC = 08:23 BRT) → edge function `enviar-alertas`.
 3. `seed.sql` — 15 editais iniciais.
+4. `radar_ajustes_seguranca` — descadastro só via edge function; search_path fixo em `aderencia`.
 
 Edge functions (código em `supabase/functions/`):
 - `enviar-alertas` — calcula aderência ≥ 75% e envia por Resend; sem `RESEND_API_KEY` só simula.
