@@ -1,0 +1,32 @@
+name: Radar semanal de editais
+
+on:
+  schedule:
+    - cron: "17 11 * * 1"   # segundas, 08:17 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r extractor/requirements.txt
+      - name: Coletar e extrair editais novos
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python extractor/radar.py semanal --max 10
+      - name: Gerar página
+        run: python scripts/build.py
+      - name: Commit dos resultados
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          git add data dist
+          git diff --cached --quiet || git commit -m "Radar: coleta semanal $(date +%F)"
+          git push

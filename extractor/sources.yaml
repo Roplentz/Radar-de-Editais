@@ -1,0 +1,39 @@
+# Páginas de listagem varridas pelo coletor.
+# Cada fonte: nome, url, orgao, abrangencia. Adicione/remova à vontade.
+fontes:
+  - nome: Finep — chamadas públicas abertas
+    url: http://www.finep.gov.br/chamadas-publicas?situacao=aberta
+    orgao: Finep
+    abrangencia: Nacional
+  - nome: CNPq — chamadas abertas
+    url: https://www.gov.br/cnpq/pt-br/chamadas/abertas-para-submissao
+    orgao: CNPq
+    abrangencia: Nacional
+  - nome: FAPERGS — editais
+    url: https://fapergs.rs.gov.br/editais-abertos
+    orgao: FAPERGS
+    abrangencia: RS
+  - nome: FAPEMIG — chamadas e editais
+    url: https://fapemig.br/oportunidades/chamadas-e-editais
+    orgao: FAPEMIG
+    abrangencia: MG
+  - nome: FAPESP — chamadas
+    url: https://fapesp.br/oportunidades
+    orgao: FAPESP
+    abrangencia: SP
+  - nome: Ministério da Saúde — chamamentos públicos 2026
+    url: https://www.gov.br/saude/pt-br/acesso-a-informacao/participacao-social/chamamentos-publicos/2026
+    orgao: Ministério da Saúde
+    abrangencia: Nacional
+  - nome: Sebrae Startups — programas
+    url: https://programas.sebraestartups.com.br/
+    orgao: Sebrae
+    abrangencia: Nacional
+  - nome: Embrapii — chamadas
+    url: https://embrapii.org.br/chamadas-publicas/
+    orgao: Embrapii
+    abrangencia: Nacional
+  - nome: Programa Centelha
+    url: https://programacentelha.com.br/
+    orgao: Finep / FAPs
+    abrangencia: Nacional

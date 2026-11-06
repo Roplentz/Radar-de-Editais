@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar de Editais — Inovação e Saúde</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --text:#e8eaf0; --muted:#9aa3b2; --accent:#4f8cff;
+    --ok:#2fbf71; --warn:#f2a93b; --danger:#ef5b5b; --cont:#8b6cff; --gray:#6b7280;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{padding:20px 16px 8px;max-width:1100px;margin:0 auto}
+  h1{margin:0;font-size:22px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .kpis{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:96px}
+  .kpi b{display:block;font-size:20px}
+  .kpi span{color:var(--muted);font-size:12px}
+  main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+  .views{display:flex;gap:6px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
+  .views button{flex:none;background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;cursor:pointer}
+  .views button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .bar input,.bar select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px}
+  .bar input{flex:1 1 220px}
+  details.perfil{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+  details.perfil summary{cursor:pointer;font-weight:600}
+  .perfil-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px}
+  .perfil-grid label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+  .perfil-grid select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px}
+  .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+  .card.closed{opacity:.55}
+  .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .card h3{margin:0;font-size:15px;line-height:1.3}
+  .org{color:var(--muted);font-size:12.5px}
+  .badge{flex:none;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .b-ok{background:rgba(47,191,113,.15);color:var(--ok)}
+  .b-warn{background:rgba(242,169,59,.15);color:var(--warn)}
+  .b-danger{background:rgba(239,91,91,.15);color:var(--danger)}
+  .b-cont{background:rgba(139,108,255,.15);color:var(--cont)}
+  .b-gray{background:rgba(107,114,128,.2);color:#b5bcc8}
+  .val{font-size:13.5px}
+  .tags{display:flex;flex-wrap:wrap;gap:5px}
+  .tag{font-size:11.5px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:#cfd5e0}
+  .tag.t-tipo{border-color:#35507f;color:#9cc0ff}
+  .tag.t-uf{border-color:#4a3f6b;color:#c7b6ff}
+  .obs{color:var(--muted);font-size:12.5px}
+  .foot{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted);margin-top:auto;padding-top:4px;border-top:1px solid var(--line)}
+  .foot a{color:var(--accent);text-decoration:none;font-weight:600}
+  .match{font-size:12px;font-weight:600;color:var(--ok)}
+  .empty{color:var(--muted);padding:30px 0;text-align:center}
+  .note{color:var(--muted);font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>📡 Radar de Editais</h1>
+  <div class="sub" id="sub">Fomento à inovação, saúde e pesquisa no Brasil</div>
+  <div class="kpis" id="kpis"></div>
+</header>
+<main>
+  <div class="views" id="views"></div>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Buscar por órgão, tema, programa…">
+    <select id="fTipo"><option value="">Tipo de recurso</option></select>
+    <select id="fUf"><option value="">Abrangência</option></select>
+    <select id="fPub"><option value="">Público</option></select>
+  </div>
+  <details class="perfil" id="perfilBox">
+    <summary>🎯 Meu perfil — ver aderência</summary>
+    <div class="perfil-grid">
+      <label>Eu sou<select id="pPub"><option value="">—</option></select></label>
+      <label>Estágio<select id="pEst"><option value="">—</option></select></label>
+      <label>Área<select id="pArea"><option value="">—</option></select></label>
+      <label>Estado<select id="pUf"><option value="">—</option></select></label>
+    </div>
+  </details>
+  <div class="list" id="list"></div>
+  <div class="note" id="note"></div>
+</main>
+
+<script>
+/* Os dados podem vir embutidos (build) ou do arquivo data/editais.json */
+const EMBEDDED = {"atualizado_em": "2026-11-05", "nota": "Base inicial curada manualmente a partir de fontes públicas. Confira sempre o edital oficial antes de submeter.", "editais": [{"id": "inova-startups-6", "titulo": "Inova Startups — 6ª edição (Inova Startups 2027)", "orgao": "Sebrae + Bossa Invest", "tipo_recurso": "Investimento", "valor_max": "Até R$ 800 mil por startup (em troca de participação)", "publico": ["Startup"], "estagio": ["Pré-seed", "Seed"], "areas": ["Qualquer setor", "Saúde"], "abrangencia": "Nacional", "inscricao_inicio": "2026-08-26", "inscricao_fim": "2026-11-30", "fluxo_continuo": false, "fonte_url": "https://inovastartups.com.br/", "observacoes": "Inscrição gratuita na plataforma Sebrae Startups. Resultado previsto para 28/02/2027.", "verificado_em": "2026-11-05"}, {"id": "fapemig-018-2026-hubmg-gov", "titulo": "Chamada FAPEMIG/SEDE 018/2026 — HubMG Gov: desafios públicos por inovação aberta", "orgao": "FAPEMIG / SEDE-MG", "tipo_recurso": "Subvenção", "valor_max": "Ver edital", "publico": ["Startup", "Empresa"], "estagio": ["Seed", "Crescimento"], "areas": ["GovTech", "Qualquer setor"], "abrangencia": "MG", "inscricao_inicio": "2026-10-09", "inscricao_fim": "2026-12-09", "fluxo_continuo": false, "fonte_url": "https://fapemig.br/oportunidades/chamadas-e-editais", "observacoes": "Resolução de desafios do governo de Minas por inovação aberta.", "verificado_em": "2026-11-05"}, {"id": "fapemig-017-2026-profix", "titulo": "Chamada FAPEMIG/CNPq/CAPES 17/2026 — PROFIX-CB (fixação de doutores)", "orgao": "FAPEMIG / CNPq / CAPES", "tipo_recurso": "Bolsa/Auxílio", "valor_max": "R$ 4,2 milhões (valor global)", "publico": ["ICT/Pesquisador"], "estagio": ["P&D"], "areas": ["Qualquer área"], "abrangencia": "MG", "inscricao_inicio": "2026-09-15", "inscricao_fim": "2026-11-10", "fluxo_continuo": false, "fonte_url": "https://fapemig.br/oportunidades/chamadas-e-editais", "observacoes": "Versão mineira do PROFIX-CB. A edição gaúcha (FAPERGS 06/2026) já encerrou.", "verificado_em": "2026-11-05"}, {"id": "fapemig-007-2026-oet", "titulo": "Chamada FAPEMIG 007/2026 — Organização de Eventos Técnico-Científicos (2ª entrada)", "orgao": "FAPEMIG", "tipo_recurso": "Bolsa/Auxílio", "valor_max": "R$ 7,5 milhões (valor global)", "publico": ["ICT/Pesquisador"], "estagio": ["P&D"], "areas": ["Eventos científicos", "Qualquer área"], "abrangencia": "MG", "inscricao_inicio": null, "inscricao_fim": "2026-12-16", "fluxo_continuo": false, "fonte_url": "https://fapemig.br/oportunidades/chamadas-e-editais", "observacoes": "", "verificado_em": "2026-11-05"}, {"id": "tecpar-saude-unica-2026", "titulo": "Tecpar — Convite de Inovação Aberta em Saúde Única", "orgao": "Tecpar (Instituto de Tecnologia do Paraná)", "tipo_recurso": "Parceria", "valor_max": "Sem repasse direto — gera acordos de cooperação técnica", "publico": ["Startup", "Empresa", "ICT/Pesquisador"], "estagio": ["P&D", "Seed"], "areas": ["Saúde", "Biotech", "Vacinas e bioinsumos"], "abrangencia": "Nacional", "inscricao_inicio": "2026-10-28", "inscricao_fim": null, "fluxo_continuo": false, "fonte_url": "https://brasilinovador.com.br/tecpar-lanca-chamada-de-inovacao-aberta-em-saude-unica-para-integrar-setor-produtivo-e-demandas-do-sus/", "observacoes": "Temas: zoonoses, resistência antimicrobiana, saúde ambiental, bioinsumos e vacinas. Prazo não divulgado na matéria — conferir em tecpar.br.", "verificado_em": "2026-11-05"}, {"id": "finep-startup-fluxo", "titulo": "Programa Finep Startup — fluxo contínuo", "orgao": "Finep", "tipo_recurso": "Investimento", "valor_max": "Até R$ 1,5 milhão (opção de participação societária)", "publico": ["Startup"], "estagio": ["Seed"], "areas": ["Qualquer setor", "Saúde", "Biotech"], "abrangencia": "Nacional", "inscricao_inicio": "2022-01-01", "inscricao_fim": null, "fluxo_continuo": true, "fonte_url": "https://dplnews.com/?p=154338", "observacoes": "Passou a operar em fluxo contínuo em 2022. Confirmar se a janela segue aberta no site da Finep.", "verificado_em": "2026-11-05"}, {"id": "embrapii-fluxo", "titulo": "Embrapii — projetos de PD&I com Unidades Embrapii (inclui saúde)", "orgao": "Embrapii", "tipo_recurso": "Subvenção", "valor_max": "Cofinanciamento de parte do projeto (varia por modalidade)", "publico": ["Startup", "Empresa"], "estagio": ["P&D", "Seed", "Crescimento"], "areas": ["Saúde", "Deep tech", "Qualquer setor"], "abrangencia": "Nacional", "inscricao_inicio": null, "inscricao_fim": null, "fluxo_continuo": true, "fonte_url": "https://medicinasa.com.br/?p=90386", "observacoes": "Não depende de edital: a empresa procura diretamente uma Unidade Embrapii credenciada.", "verificado_em": "2026-11-05"}, {"id": "finep-mais-inovacao-saude-r2", "titulo": "Finep Mais Inovação Brasil — Rodada 2 — Saúde / Empresas", "orgao": "Finep / FNDCT", "tipo_recurso": "Subvenção", "valor_max": "R$ 300 milhões (valor global)", "publico": ["Empresa"], "estagio": ["P&D", "Crescimento"], "areas": ["Saúde", "Fármacos"], "abrangencia": "Nacional", "inscricao_inicio": null, "inscricao_fim": "2026-08-31", "fluxo_continuo": false, "fonte_url": "https://firjan.com.br/data/files/07/07/10/B3/770AC910B13359B9D8284EA8/Boletim_Radar_Recursos_Firjan_Marco2026.pdf", "observacoes": "Referência para a próxima rodada.", "verificado_em": "2026-11-05"}, {"id": "tecnova-2026-2027", "titulo": "Programa Tecnova 2026/2027", "orgao": "MCTI / Finep (descentralizado pelas FAPs)", "tipo_recurso": "Subvenção", "valor_max": "Ver edital estadual", "publico": ["Startup", "Empresa"], "estagio": ["Seed", "Crescimento"], "areas": ["Qualquer setor"], "abrangencia": "Nacional", "inscricao_inicio": "2026-06-16", "inscricao_fim": "2026-08-03", "fluxo_continuo": false, "fonte_url": "https://www.correiodamanha.com.br/economia/2026/06/294728-rs-360-mi-a-pequenas-empresas-inovadoras.html", "observacoes": "Até 60 meses de execução.", "verificado_em": "2026-11-05"}, {"id": "cnpq-universal-2026", "titulo": "Chamada Universal CNPq/MCTI/FNDCT nº 06/2026", "orgao": "CNPq / FNDCT", "tipo_recurso": "Bolsa/Auxílio", "valor_max": "R$ 300 milhões (valor global)", "publico": ["ICT/Pesquisador"], "estagio": ["P&D"], "areas": ["Qualquer área", "Saúde"], "abrangencia": "Nacional", "inscricao_inicio": null, "inscricao_fim": "2026-08-03", "fluxo_continuo": false, "fonte_url": "https://www.gov.br/cnpq/pt-br/assuntos/defeso-eleitoral/chamada-universal-vai-financiar-r-300-milhoes-em-projetos-de-pesquisa-em-todo-pais-inscricoes-vao-ate-03-08", "observacoes": "Mínimo de 30% para Norte, Nordeste e Centro-Oeste.", "verificado_em": "2026-11-05"}, {"id": "cnpq-25-2026-endometriose", "titulo": "Chamada CNPq/MCTI nº 25/2026 — Endometriose e Saúde Menstrual", "orgao": "CNPq / MCTI", "tipo_recurso": "Bolsa/Auxílio", "valor_max": "Ver chamada", "publico": ["ICT/Pesquisador"], "estagio": ["P&D"], "areas": ["Saúde", "Saúde da mulher"], "abrangencia": "Nacional", "inscricao_inicio": "2026-07-10", "inscricao_fim": null, "fluxo_continuo": false, "fonte_url": "https://www.gov.br/cnpq/pt-br/chamadas/todas-as-chamadas/chamadas-2026/chamada-no-25-2026/chamada-publica-cnpq-N-25-2026", "observacoes": "Publicada em 10/07/2026. Prazo não capturado — conferir na página da chamada.", "verificado_em": "2026-11-05"}, {"id": "hackathon-sus-oncologia", "titulo": "Hackathon SUS / Edital Inova SUS — oncologia (MS + Sebrae)", "orgao": "Ministério da Saúde (SCTIE) + Sebrae", "tipo_recurso": "Prêmio", "valor_max": "Até R$ 100 mil + aceleração", "publico": ["Startup"], "estagio": ["Pré-seed", "Seed"], "areas": ["Saúde", "Dispositivos médicos", "Deep tech"], "abrangencia": "Nacional", "inscricao_inicio": "2026-04-30", "inscricao_fim": "2026-06-10", "fluxo_continuo": false, "fonte_url": "https://www.gov.br/saude/pt-br/acesso-a-informacao/participacao-social/chamamentos-publicos/2026/chamamento-publico-no-01-2026-sctie/edital", "observacoes": "Execução até abril/2027.", "verificado_em": "2026-11-05"}, {"id": "ms-seidigi-01-2026", "titulo": "Chamamento Público MS/SEIDIGI nº 01/2026 — soluções de saúde digital para o SUS", "orgao": "Ministério da Saúde (SEIDIGI)", "tipo_recurso": "Parceria", "valor_max": "Ver edital", "publico": ["Startup", "Empresa", "ICT/Pesquisador"], "estagio": ["Seed", "Crescimento"], "areas": ["Saúde", "Saúde digital"], "abrangencia": "Nacional", "inscricao_inicio": "2026-01-08", "inscricao_fim": "2026-02-20", "fluxo_continuo": false, "fonte_url": "https://sbis.org.br/noticia/ministerio-da-saude-lanca-chamamento-publico-para-solucoes-inovadoras-em-saude-digital-no-sus/", "observacoes": "", "verificado_em": "2026-11-05"}, {"id": "fapergs-06-2026-profix", "titulo": "Edital FAPERGS/CNPq/CAPES 06/2026 — PROFIX-CB", "orgao": "FAPERGS / CNPq / CAPES", "tipo_recurso": "Bolsa/Auxílio", "valor_max": "Até 61 propostas apoiadas", "publico": ["ICT/Pesquisador"], "estagio": ["P&D"], "areas": ["Qualquer área"], "abrangencia": "RS", "inscricao_inicio": null, "inscricao_fim": "2026-10-08", "fluxo_continuo": false, "fonte_url": "https://fapergs.rs.gov.br/edital-fapergs-cnpq-capes-06-2026-programa-de-apoio-a-fixacao-de-doutores-no-brasil-profix-cb", "observacoes": "", "verificado_em": "2026-11-05"}, {"id": "centelha-3-rs", "titulo": "Programa Centelha 3/RS — Edital FAPERGS 07/2025", "orgao": "FAPERGS / Finep / CNPq", "tipo_recurso": "Subvenção", "valor_max": "Ver edital", "publico": ["Pessoa física", "Startup"], "estagio": ["Ideação", "Pré-seed"], "areas": ["Qualquer setor"], "abrangencia": "RS", "inscricao_inicio": "2025-10-31", "inscricao_fim": null, "status_manual": "Encerrado", "fluxo_continuo": false, "fonte_url": "https://programacentelha.com.br/wp-content/uploads/2025/10/Edital-Centelha-3-RS-31-10-2025.pdf", "observacoes": "Fase 1 já selecionada (jan/2026). Próxima edição: acompanhar FAPERGS.", "verificado_em": "2026-11-05"}]};
+
+const UFS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+const VIEWS = [
+  ["todos","Todos"],["abertos","Abertos agora"],["30d","Fecham em 30 dias"],
+  ["saude","Saúde"],["startup","Startups"],["pesq","Pesquisadores"],
+  ["continuo","Fluxo contínuo"],["encerrados","Encerrados"]
+];
+let DB = [], view = "abertos";
+const $ = id => document.getElementById(id);
+const today = (()=>{const d=new Date();d.setHours(0,0,0,0);return d})();
+const parse = s => s ? new Date(s+"T00:00:00") : null;
+const fmt = s => s ? parse(s).toLocaleDateString("pt-BR") : "—";
+
+function status(e){
+  if(e.status_manual==="Encerrado") return {k:"closed",label:"Encerrado",cls:"b-gray",rank:4};
+  if(e.fluxo_continuo) return {k:"cont",label:"Fluxo contínuo",cls:"b-cont",rank:2};
+  const ini=parse(e.inscricao_inicio), fim=parse(e.inscricao_fim);
+  if(ini && ini>today) return {k:"soon",label:"Abre "+fmt(e.inscricao_inicio),cls:"b-gray",rank:3};
+  if(!fim) return {k:"tbd",label:"Prazo a confirmar",cls:"b-gray",rank:3};
+  const d=Math.round((fim-today)/864e5);
+  if(d<0) return {k:"closed",label:"Encerrado",cls:"b-gray",rank:4,days:d};
+  if(d===0) return {k:"open",label:"Fecha hoje",cls:"b-danger",rank:1,days:0};
+  if(d<=7) return {k:"open",label:`Fecha em ${d} dia${d>1?"s":""}`,cls:"b-danger",rank:1,days:d};
+  if(d<=30) return {k:"open",label:`Fecha em ${d} dias`,cls:"b-warn",rank:1,days:d};
+  return {k:"open",label:"Aberto",cls:"b-ok",rank:1,days:d};
+}
+
+function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(_){return null}}
+
+function aderencia(e){
+  const p={pub:$("pPub").value,est:$("pEst").value,area:$("pArea").value,uf:$("pUf").value};
+  const crit=Object.values(p).filter(Boolean).length; if(!crit) return null;
+  let s=0;
+  if(p.pub && e.publico.includes(p.pub)) s++;
+  if(p.est && e.estagio.includes(p.est)) s++;
+  if(p.area && (e.areas.includes(p.area) || e.areas.some(a=>/qualquer/i.test(a)))) s++;
+  if(p.uf && (e.abrangencia==="Nacional" || e.abrangencia===p.uf)) s++;
+  return Math.round(100*s/crit);
+}
+
+function inView(e,st){
+  switch(view){
+    case "abertos": return st.k==="open"||st.k==="cont";
+    case "30d": return st.k==="open" && st.days<=30;
+    case "saude": return e.areas.some(a=>/sa[uú]de|f[aá]rmac|biotech|dispositivo|vacina/i.test(a));
+    case "startup": return e.publico.includes("Startup");
+    case "pesq": return e.publico.includes("ICT/Pesquisador");
+    case "continuo": return st.k==="cont";
+    case "encerrados": return st.k==="closed";
+    default: return true;
+  }
+}
+
+function render(){
+  const q=$("q").value.trim().toLowerCase(), ft=$("fTipo").value, fu=$("fUf").value, fp=$("fPub").value;
+  let rows=DB.map(e=>({e,st:status(e),m:aderencia(e)}))
+    .filter(({e,st})=>inView(e,st))
+    .filter(({e})=>!ft||e.tipo_recurso===ft)
+    .filter(({e})=>!fu||e.abrangencia===fu)
+    .filter(({e})=>!fp||e.publico.includes(fp))
+    .filter(({e})=>!q||JSON.stringify(e).toLowerCase().includes(q));
+  rows.sort((a,b)=> (b.m??-1)-(a.m??-1) || a.st.rank-b.st.rank || (a.st.days??9e9)-(b.st.days??9e9));
+  $("list").innerHTML = rows.length ? rows.map(({e,st,m})=>`
+    <article class="card ${st.k==="closed"?"closed":""}">
+      <div class="top"><h3>${e.titulo}</h3><span class="badge ${st.cls}">${st.label}</span></div>
+      <div class="org">${e.orgao}</div>
+      <div class="val">💰 ${e.valor_max}</div>
+      <div class="tags">
+        <span class="tag t-tipo">${e.tipo_recurso}</span>
+        <span class="tag t-uf">${e.abrangencia}</span>
+        ${e.publico.map(x=>`<span class="tag">${x}</span>`).join("")}
+        ${e.estagio.map(x=>`<span class="tag">${x}</span>`).join("")}
+        ${e.areas.map(x=>`<span class="tag">${x}</span>`).join("")}
+      </div>
+      ${e.observacoes?`<div class="obs">${e.observacoes}</div>`:""}
+      <div class="foot">
+        <span>${e.fluxo_continuo?"Sem prazo fixo":"Prazo: "+fmt(e.inscricao_fim)}${m!=null?` · <span class="match">${m}% aderência</span>`:""}</span>
+        <a href="${e.fonte_url}" target="_blank" rel="noopener">Fonte ↗</a>
+      </div>
+    </article>`).join("") : `<div class="empty">Nada nesta visão com os filtros atuais.</div>`;
+}
+
+function fill(sel, vals){ vals.forEach(v=>{const o=document.createElement("option");o.value=o.textContent=v;sel.appendChild(o)}); }
+
+function init(data){
+  DB=data.editais;
+  const all=k=>[...new Set(DB.flatMap(e=>[].concat(e[k])))].sort((a,b)=>a.localeCompare(b,"pt"));
+  fill($("fTipo"),all("tipo_recurso")); fill($("fUf"),all("abrangencia")); fill($("fPub"),all("publico"));
+  fill($("pPub"),all("publico")); fill($("pEst"),all("estagio"));
+  fill($("pArea"),all("areas").filter(a=>!/qualquer/i.test(a))); fill($("pUf"),UFS);
+  ["pPub","pEst","pArea","pUf"].forEach(id=>{const v=store("radar_"+id); if(v) $(id).value=v;
+    $(id).onchange=()=>{store("radar_"+id,$(id).value);render()}});
+  const sts=DB.map(status);
+  const open=sts.filter(s=>s.k==="open").length, cont=sts.filter(s=>s.k==="cont").length,
+        soon=sts.filter(s=>s.k==="open"&&s.days<=30).length;
+  $("kpis").innerHTML=`<div class="kpi"><b>${open}</b><span>abertos</span></div>
+    <div class="kpi"><b>${soon}</b><span>fecham em 30 dias</span></div>
+    <div class="kpi"><b>${cont}</b><span>fluxo contínuo</span></div>
+    <div class="kpi"><b>${DB.length}</b><span>na base</span></div>`;
+  $("sub").textContent=`Fomento à inovação, saúde e pesquisa no Brasil · base atualizada em ${fmt(data.atualizado_em)}`;
+  $("note").textContent=data.nota||"";
+  $("views").innerHTML=VIEWS.map(([k,l])=>`<button data-v="${k}" class="${k===view?"on":""}">${l}</button>`).join("");
+  $("views").onclick=ev=>{const b=ev.target.closest("button"); if(!b) return; view=b.dataset.v;
+    [...$("views").children].forEach(x=>x.classList.toggle("on",x===b)); render();};
+  ["q","fTipo","fUf","fPub"].forEach(id=>$(id).addEventListener("input",render));
+  render();
+}
+
+if(EMBEDDED) init(EMBEDDED);
+else fetch("../data/editais.json").then(r=>r.json()).then(init)
+  .catch(()=>{$("list").innerHTML='<div class="empty">Não consegui carregar data/editais.json.</div>'});
+</script>
+</body>
+</html>
