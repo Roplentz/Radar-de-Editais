@@ -54,6 +54,12 @@
   .match{font-size:12px;font-weight:600;color:var(--ok)}
   .empty{color:var(--muted);padding:30px 0;text-align:center}
   .note{color:var(--muted);font-size:12px;margin-top:18px}
+  .alerta-form{display:flex;flex-direction:column;gap:8px;margin-top:10px;max-width:480px}
+  .alerta-form input[type=text],.alerta-form input[type=email]{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:14px}
+  .alerta-form button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px;font-weight:600;font-size:14px;cursor:pointer}
+  .alerta-form button:disabled{opacity:.6}
+  .consent{font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:flex-start}
+  .banner{background:rgba(47,191,113,.12);border:1px solid rgba(47,191,113,.4);color:#c9f5dc;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px}
 </style>
 </head>
 <body>
@@ -79,13 +85,29 @@
       <label>Estado<select id="pUf"><option value="">—</option></select></label>
     </div>
   </details>
+  <div class="banner" id="banner" hidden></div>
+  <details class="perfil alerta" id="alertaBox">
+    <summary>✉️ Receber alertas por e-mail</summary>
+    <form id="formAlerta" class="alerta-form">
+      <p class="obs">Toda segunda, você recebe os editais abertos com 75% ou mais de aderência ao perfil acima (preencha “Meu perfil” primeiro).</p>
+      <input id="aNome" type="text" placeholder="Seu nome (opcional)" maxlength="120">
+      <input id="aEmail" type="email" placeholder="seu@email.com" required maxlength="200">
+      <label class="consent"><input id="aOk" type="checkbox" required> Aceito receber e-mails do Radar de Editais. Posso cancelar a qualquer momento pelo link no e-mail.</label>
+      <button type="submit" id="aBtn">Quero receber</button>
+      <div id="aMsg" class="obs"></div>
+    </form>
+  </details>
   <div class="list" id="list"></div>
   <div class="note" id="note"></div>
 </main>
 
 <script>
-/* Os dados podem vir embutidos (build) ou do arquivo data/editais.json */
+/* Fonte de dados: Supabase (ao vivo) → dados embutidos no build → data/editais.json */
 const EMBEDDED = /*__DATA__*/null;
+const SUPABASE_URL = "https://hdolmwxpnzdybcgdpuyk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_2vW0kMJa2SeldynoMhor5Q_tgTXZWgv"; // chave pública (somente leitura + assinatura)
+const sb = (path, opts={}) => fetch(SUPABASE_URL + path, {...opts,
+  headers:{apikey:SUPABASE_KEY, "Content-Type":"application/json", ...(opts.headers||{})}});
 
 const UFS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
 const VIEWS = [
@@ -152,7 +174,7 @@ function render(){
     <article class="card ${st.k==="closed"?"closed":""}">
       <div class="top"><h3>${e.titulo}</h3><span class="badge ${st.cls}">${st.label}</span></div>
       <div class="org">${e.orgao}</div>
-      <div class="val">💰 ${e.valor_max}</div>
+      <div class="val">💰 ${e.valor_max||"Ver edital"}</div>
       <div class="tags">
         <span class="tag t-tipo">${e.tipo_recurso}</span>
         <span class="tag t-uf">${e.abrangencia}</span>
@@ -194,9 +216,47 @@ function init(data){
   render();
 }
 
-if(EMBEDDED) init(EMBEDDED);
-else fetch("../data/editais.json").then(r=>r.json()).then(init)
-  .catch(()=>{$("list").innerHTML='<div class="empty">Não consegui carregar data/editais.json.</div>'});
+/* Alertas por e-mail */
+$("formAlerta").addEventListener("submit", async ev=>{
+  ev.preventDefault();
+  const msg=$("aMsg"), btn=$("aBtn");
+  const areas=$("pArea").value?[$("pArea").value]:[];
+  if(!$("pPub").value && !$("pEst").value && !areas.length && !$("pUf").value){
+    $("perfilBox").open=true; msg.textContent="Preencha pelo menos um campo em “Meu perfil” para os alertas fazerem sentido."; return;
+  }
+  btn.disabled=true; msg.textContent="Enviando…";
+  try{
+    const r=await sb("/rest/v1/rpc/assinar_radar",{method:"POST",body:JSON.stringify({
+      p_email:$("aEmail").value.trim(), p_nome:$("aNome").value.trim()||null,
+      p_publico:$("pPub").value||null, p_estagio:$("pEst").value||null, p_areas:areas, p_uf:$("pUf").value||null})});
+    if(!r.ok){ const t=await r.text(); throw new Error(/inv[aá]lido/i.test(t)?"E-mail inválido.":"Falha ao salvar."); }
+    msg.textContent="✅ Pronto! Você vai receber os editais compatíveis toda segunda-feira.";
+    $("formAlerta").reset();
+  }catch(e){
+    msg.textContent = e instanceof TypeError
+      ? "Esta visualização não consegue enviar o formulário. Use a versão publicada do radar."
+      : "⚠️ "+e.message;
+  }finally{ btn.disabled=false; }
+});
+
+const qs=new URLSearchParams(location.search).get("alertas");
+if(qs){ $("banner").hidden=false;
+  $("banner").textContent = qs==="cancelado" ? "Seus alertas foram cancelados. Você não receberá mais e-mails." : "Link de cancelamento inválido ou já usado."; }
+
+async function carregar(){
+  try{
+    const r=await sb("/rest/v1/editais?select=*&order=inscricao_fim.asc.nullslast");
+    if(!r.ok) throw 0;
+    const editais=await r.json();
+    const ult=editais.map(e=>e.verificado_em).sort().pop();
+    return {editais, atualizado_em:ult, nota:"Dados ao vivo do banco do Radar. Confira sempre o edital oficial antes de submeter."};
+  }catch(_){
+    if(EMBEDDED) return EMBEDDED;
+    return fetch("../data/editais.json").then(r=>r.json());
+  }
+}
+carregar().then(init)
+  .catch(()=>{$("list").innerHTML='<div class="empty">Não consegui carregar os editais.</div>'});
 </script>
 </body>
 </html>
