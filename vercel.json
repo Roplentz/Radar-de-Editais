@@ -1,6 +1,0 @@
-{
-  "framework": null,
-  "installCommand": "echo sem-dependencias",
-  "buildCommand": "mkdir -p public && cp dist/index.html public/index.html",
-  "outputDirectory": "public"
-}
