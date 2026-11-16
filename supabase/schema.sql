@@ -86,6 +86,8 @@ create table if not exists alertas_enviados (
 alter table editais enable row level security;
 alter table perfis  enable row level security;
 alter table alertas_enviados enable row level security;
+-- fontes: sem política pública; só o coletor (service_role, que ignora RLS) lê e escreve.
+alter table fontes enable row level security;
 
 drop policy if exists "editais leitura publica" on editais;
 create policy "editais leitura publica" on editais for select using (true);
