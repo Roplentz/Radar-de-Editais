@@ -1,0 +1,21 @@
+# Atualizações automáticas de dependências (mensal, agrupadas para reduzir ruído)
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/extractor"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      pip-atualizacoes:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions-atualizacoes:
+        patterns:
+          - "*"
